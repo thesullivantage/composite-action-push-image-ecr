@@ -29,7 +29,6 @@ inputs:
   aws_container_account:
     description: 'AWS container account ID'
     required: true
-    type: string
 
 permissions:
   id-token: write
