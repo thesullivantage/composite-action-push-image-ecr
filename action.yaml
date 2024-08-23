@@ -1,58 +1,66 @@
 name: Publish to ECR
-description: Build a container image and Pushes it to ECR
+description: Build a container image and push it to ECR
 
 inputs:
   folder:
+    description: 'The folder containing the Dockerfile'
     required: true
     type: string
   repository_name:
+    description: 'The name of the ECR repository'
     required: true
     type: string
-  image_tag: 
+  image_tag:
+    description: 'The tag to use for the image'
     required: true
     type: string
   aws_region:
+    description: 'The AWS region for ECR'
     required: true
     type: string
   iam_role:
+    description: 'IAM role to assume for AWS operations'
     required: true
+    type: string
   account_ID:
+    description: 'AWS account ID'
     required: true
+    type: string
   aws_container_account:
+    description: 'AWS container account ID'
     required: true
+    type: string
 
 permissions:
-      id-token: write
-      contents: read
+  id-token: write
+  contents: read
 
 runs:
   using: composite
   steps:
-  - name: Configure AWS Credentials
-    uses: aws-actions/configure-aws-credentials@v1
-    with:
-      role-to-assume: ${{inputs.iam_role}}
-      aws-region: ${{inputs.aws_region}}
-#       role-skip-session-tagging: true
-#       role-duration-seconds: 1200
-  - name: Login to ECR
-    id: login-ecr
-    uses: aws-actions/amazon-ecr-login@v2
-  - name: Login to ECR: AWS Hosted
-    id: login-ecr-aws
-    uses: aws-actions/amazon-ecr-login@v2
-    env:
-      AWS_HOSTED_ID: ${{inputs.aws_container_account}}
-    with:
-      registries: "$AWS_HOSTED_ID"
-  - name: Build and Push image to ECR
-    shell: bash
-    env:
-      REGISTRY: ${{steps.login-ecr.outputs.registry}}
-      REPOSITORY: ${{inputs.repository_name}}
-      IMAGE_TAG: ${{inputs.image_tag}}
-    run: |
-      cd ${{inputs.folder}}
-      docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
-      echo "Pushing image to ECR..."
-      docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        role-to-assume: ${{ inputs.iam_role }}
+        aws-region: ${{ inputs.aws_region }}
+    - name: Login to ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+    - name: Login to ECR: AWS Hosted
+      id: login-ecr-aws
+      uses: aws-actions/amazon-ecr-login@v2
+      env:
+        AWS_HOSTED_ID: ${{ inputs.aws_container_account }}
+      with:
+        registries: ${{ inputs.aws_container_account }}
+    - name: Build and Push image to ECR
+      shell: bash
+      env:
+        REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        REPOSITORY: ${{ inputs.repository_name }}
+        IMAGE_TAG: ${{ inputs.image_tag }}
+      run: |
+        cd ${{ inputs.folder }}
+        docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+        echo "Pushing image to ECR..."
+        docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
