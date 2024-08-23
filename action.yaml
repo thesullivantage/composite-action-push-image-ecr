@@ -16,6 +16,9 @@ inputs:
     type: string
   iam_role:
     required: true
+  account_ID:
+    required: true
+  sagemaker_
 
 permissions:
       id-token: write
@@ -31,11 +34,9 @@ runs:
       aws-region: ${{inputs.aws_region}}
 #       role-skip-session-tagging: true
 #       role-duration-seconds: 1200
-
   - name: Login to ECR
     id: login-ecr
-    uses: aws-actions/amazon-ecr-login@v1
-
+    uses: aws-actions/amazon-ecr-login@v2
   - name: Build and Push image to ECR
     shell: bash
     env:
