@@ -42,7 +42,7 @@ runs:
     id: login-ecr-aws
     uses: aws-actions/amazon-ecr-login@v2
     with:
-      registries: "${{inputs.aws_container_account}}"
+      registries: ${{inputs.aws_container_account}}
   - name: Build and Push image to ECR
     shell: bash
     env:
