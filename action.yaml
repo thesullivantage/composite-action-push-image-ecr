@@ -18,6 +18,8 @@ inputs:
     required: true
   account_ID:
     required: true
+  aws_container_registry:
+    required: true
 
 permissions:
       id-token: write
@@ -36,6 +38,11 @@ runs:
   - name: Login to ECR
     id: login-ecr
     uses: aws-actions/amazon-ecr-login@v2
+  - name: Login to ECR: AWS Hosted
+    id: login-ecr-aws
+    uses: aws-actions/amazon-ecr-login@v2
+    with:
+      registries: ${{inputs.aws_container_account}}
   - name: Build and Push image to ECR
     shell: bash
     env:
